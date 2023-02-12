@@ -14,6 +14,22 @@ type Props = {
     };
 };
 
+export const revalidate = 30;   // this revalidates this page every 30 sec
+
+export async function generateStaticParams() {
+    const query = groq`*[_type=='post']
+    {
+        slug
+    }`;
+
+    const slugs: Post[] = await client.fetch(query);
+    const slugRoutes = slugs.map((slug) => slug.slug.current);
+
+    return slugRoutes.map(slug => ({
+        slug,
+    }));
+}
+
 async function Post({ params: { slug } }: Props) {
     const query = groq`
         *[_type=='post' && slug.current == $slug][0]
@@ -29,7 +45,9 @@ async function Post({ params: { slug } }: Props) {
         <section className="space-y-2 border border-[#f7ab04] text-white ">
             <div className="relative min-h-56 flex flex-col md:flex-row justify-between ">
                 <div className="absolute top-0 w-full h-full opacity-10 blur-sm p-10">
+                    { post && post.mainImage &&
                     <Image className="object-cover object-center mx-auto" src={ urlFor( post.mainImage).url()} alt={post.author.name} fill />
+                    }
                 </div>
 
 
@@ -38,9 +56,11 @@ async function Post({ params: { slug } }: Props) {
                     <div className="flex flex-col md:flex-row justify-between gap-y-5">
 
                         <div>
+                            {post && post.title &&
                             <h1 className="text-4xl font-extrabold">{post.title}</h1>
+                            }
                             <p>
-                                {new Date(post._createdAt).toLocaleDateString("en-US", {
+                                {post && post._createdAt && new Date(post._createdAt).toLocaleDateString("en-US", {
                                     day: "numeric",
                                     month: "long",
                                     year: "numeric",
@@ -49,9 +69,13 @@ async function Post({ params: { slug } }: Props) {
                         </div>
 
                         <div className="flex items-center space-x-2">
+                            {post && post.author &&
                             <Image className="rounded-full" src={urlFor(post.author.image).url()} alt={post.author.name} height={40} width={40} />
+                            }
                             <div className="w-64">
+                            {post && post.author &&
                                 <h3>{post.author.name}</h3>
+                            }
                                 <div>
                                     {/* BIO */}
                                 </div>
@@ -60,9 +84,11 @@ async function Post({ params: { slug } }: Props) {
                     </div>
                     
                     <div>
+                        {post && post.description&& 
                         <h2 className="italic pt-10">{post.description}</h2>
+                        }
                         <div className="flex items-center justify-end mt-auto space-x-2">
-                            {post.categories.map((category) => (
+                            {post && post.categories && post.categories.map((category) => (
                                 <p key={category._id} className="bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-semibold mt-4 ">
                                     {category.title}
                                 </p>
@@ -73,8 +99,9 @@ async function Post({ params: { slug } }: Props) {
                 </section>
             </div>
         </section>
-
+        { post && post.body && 
         <PortableText value={post.body} components={RichTextComponents} />
+        }
 
     </article>
 };
