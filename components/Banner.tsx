@@ -9,7 +9,7 @@ function Banner() {
 
       </div>
       <div className="flex justify-center p-0 m-0  mt-5 md:mt-5">
-        <p className=" text-gray-400 max-w-sm  text-center md:text-justify  ">Get my latest post , anythime anywhere. 
+        <p className=" text-gray-400 max-w-sm  text-center md:text-justify  ">Get my latest post , anytime anywhere. 
         </p>
       </div>
 
